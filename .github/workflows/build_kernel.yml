@@ -1,7 +1,6 @@
 name: Compile Kernel
 
 on:
-  # Allow to trigger action manually
   workflow_dispatch:
     inputs:
       kernel_version:
