@@ -62,7 +62,7 @@ jobs:
         # Set MODULE_PATH variable
         cd $WORK_DIR
         MODULE_PATH="/lib/modules/${KERNEL_V}-mos"
-        
+
         # Create list of required Firmware files
         find "$MODULE_PATH" -name "*.ko.xz" -exec modinfo {} \; 2>/dev/null | \
           grep "^firmware:" | \
@@ -70,15 +70,23 @@ jobs:
           sed 's/^[[:space:]]*//' | \
           sort -u > "$WORK_DIR/required_firmware"
 
-        # Copy required Firmware files to /lib/firmware
+        # Only put existing files/symlinks in required list
         while read fw; do
-          echo $fw
-          if [ -L "linux-firmware/$fw" ]; then
-            readlink "linux-firmware/$fw"
+          if [ -e "$WORK_DIR/linux-firmware/$fw" ]; then
+            echo "$fw" >> "$WORK_DIR/required_firmware_complete"
+          else
+            echo "Missing Firmware: $fw" >&2
           fi
-        done < $WORK_DIR/required_firmware | sort -u > $WORK_DIR/required_firmware_complete
+        done < "$WORK_DIR/required_firmware"
 
-        rsync -av --files-from=$WORK_DIR/required_firmware_complete $WORK_DIR/linux-firmware/ /lib/firmware/
+        # Remove doulbe entries from compiled required list
+        sort -u -o "$WORK_DIR/required_firmware_complete" "$WORK_DIR/required_firmware_complete"
+
+        # Copy files and symlinks
+        rsync -av --files-from="$WORK_DIR/required_firmware_complete" "$WORK_DIR/linux-firmware/" /lib/firmware/
+
+        # Copy symlink targets
+        rsync -av --files-from="$WORK_DIR/required_firmware_complete" --copy-links "$WORK_DIR/linux-firmware/" /lib/firmware/
 
         # Copy over Modules and Firmware files and make sure to save attributes
         cp -a /lib/modules $WORK_DIR/$KERNEL_V/
