@@ -54,10 +54,11 @@ jobs:
         
         # Clone Linux Firmware
         cd $WORK_DIR
-        git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
-        cd $WORK_DIR/linux-firmware
+        git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git $WORK_DIR/firmware-source
+        cd $WORK_DIR/firmware-source
         FW_COMMIT=$(git rev-parse HEAD)
         FW_COMMIT_SORT=$(git rev-parse --short HEAD)
+        ./copy-firmware $WORK_DIR/linux-firmware
 
         # Set MODULE_PATH variable
         cd $WORK_DIR
@@ -116,7 +117,7 @@ jobs:
           Custom MOS Kernel and Drivers: ${{ github.event.inputs.kernel_version }}-mos
 
           ### Release contents:
-          [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }}): v${{ github.event.inputs.kernel_version }}
+          [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }}): ${{ github.event.inputs.kernel_version }}
           [Firmware](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/commit/?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SORT }}
         draft: false
         prerelease: false
