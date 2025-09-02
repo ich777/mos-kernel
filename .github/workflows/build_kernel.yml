@@ -3,16 +3,16 @@ name: Compile Kernel
 on:
   # Allow to trigger action manually
   workflow_dispatch:
-
-jobs:
-  build_kernel:
-    runs-on: self-hosted
     inputs:
       kernel_version:
         description: 'Kernel Version'
         required: true
         default: '6.14.11'
         type: string
+
+jobs:
+  build_kernel:
+    runs-on: self-hosted
 
     steps:
     - name: Checkout repository
