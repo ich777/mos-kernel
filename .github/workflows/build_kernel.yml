@@ -21,7 +21,7 @@ jobs:
         fetch-depth: 1
 
     - name: Install dependencies
-      run: apt-get update && apt-get -y install build-essential flex bison libncurses-dev libssl-dev libelf-dev bc dwarves kmod squashfs-tools
+      run: apt-get update && apt-get -y install build-essential flex bison libncurses-dev libssl-dev libelf-dev bc dwarves kmod squashfs-tools rsync
 
     - name: Compile Kernel
       run: |
