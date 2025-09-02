@@ -89,7 +89,6 @@ jobs:
         mksquashfs $WORK_DIR/$KERNEL_V $WORK_DIR/drivers -noappend -comp xz
 
         # Create md5 sums
-        $WORK_DIR
         md5sum $WORK_DIR/image | awk '{print $1}' > $WORK_DIR/image.md5
         md5sum $WORK_DIR/drivers | awk '{print $1}' > $WORK_DIR/drivers.md5
 
