@@ -72,13 +72,13 @@ jobs:
 
         # Copy required Firmware files to /lib/firmware
         while read fw; do
-          if [ -f "linux-firmware/$fw" ]; then
-            mkdir -p "/lib/firmware/$(dirname "$fw")"
-            cp "linux-firmware/$fw" "/lib/firmware/$fw" && echo "Firmware Copied: $fw"
-          else
-            echo "Firmware Missing: $fw"
+          echo $fw
+          if [ -L "linux-firmware/$fw" ]; then
+            readlink "linux-firmware/$fw"
           fi
-        done < "$WORK_DIR/required_firmware"
+        done < $WORK_DIR/required_firmware | sort -u > $WORK_DIR/required_firmware_complete
+
+        rsync -av --files-from=$WORK_DIR/required_firmware_complete $WORK_DIR/linux-firmware/ /lib/firmware/
 
         # Copy over Modules and Firmware files and make sure to save attributes
         cp -a /lib/modules $WORK_DIR/$KERNEL_V/
