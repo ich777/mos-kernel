@@ -1,0 +1,157 @@
+name: Compile Kernel
+
+on:
+  # Allow to trigger action manually
+  workflow_dispatch:
+
+jobs:
+  build_kernel:
+    runs-on: self-hosted
+    inputs:
+      kernel_version:
+        description: 'Kernel Version'
+        required: true
+        default: '6.14.11'
+        type: string
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+
+    - name: Install dependencies
+      run: apt-get update && apt-get -y install build-essential flex bison libncurses-dev libssl-dev libelf-dev bc dwarves kmod squashfs-tools
+
+    - name: Compile Kernel
+      run: |
+        # Set Variables and create directories
+        DEFAULT_DIR=${{ github.workspace }}
+        BUILD_DIR=${DEFAULT_DIR}/build
+        WORK_DIR=${DEFAULT_DIR}
+        KERNEL_V=${{ github.event.inputs.kernel_version }}
+        rm -rf /lib/modules /lib/firmware
+        mkdir -p $BUILD_DIR $WORK_DIR/$KERNEL_V $BUILD_DIR/$KERNEL_V /lib/modules /lib/firmware
+
+        # Download and extract Kernel
+        cd $BUILD_DIR
+        wget -O $BUILD_DIR/linux-$KERNEL_V.tar.xz https://cdn.kernel.org/pub/linux/kernel/v${KERNEL_V%%.*}.x/linux-$KERNEL_V.tar.xz;
+        tar -C $BUILD_DIR/$KERNEL_V --strip-components=1 -xf $BUILD_DIR/linux-$KERNEL_V.tar.xz
+
+        # Copy Kernel config
+        cd $BUILD_DIR/$KERNEL_V
+        cp $DEFAULT_DIR/kernel-config/config $BUILD_DIR/$KERNEL_V/.config
+
+        # Compile Kernel
+        make oldconfig
+        make -j$(nproc --all)
+
+        # Copy image to output directory
+        cp $BUILD_DIR/$KERNEL_V/arch/x86_64/boot/bzImage $WORK_DIR/image
+
+        # Install Modules to /lib/modules
+        make modules_install -j$(nproc --all)
+        
+        # Clone Linux Firmware
+        cd $WORK_DIR
+        git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git
+        cd $WORK_DIR/linux-firmware
+        FW_COMMIT=$(git rev-parse HEAD)
+        FW_COMMIT_SORT=$(git rev-parse --short HEAD)
+
+        # Set MODULE_PATH variable
+        MODULE_PATH="/lib/modules/${KERNEL_V}-mos"
+        
+        # Create list of required Firmware files
+        find "$MODULE_PATH" -name "*.ko.xz" -exec modinfo {} \; 2>/dev/null | \
+          grep "^firmware:" | \
+          cut -d: -f2- | \
+          sed 's/^[[:space:]]*//' | \
+          sort -u > "$WORK_DIR/required_firmware"
+
+        # Copy required Firmware files to /lib/firmware
+        while read fw; do
+          if [ -f "linux-firmware/$fw" ]; then
+            mkdir -p "/lib/firmware/$(dirname "$fw")"
+            cp "linux-firmware/$fw" "/lib/firmware/$fw" && echo "Firmware Copied: $fw"
+          else
+            echo "Firmware Missing: $fw"
+          fi
+        done < "$WORK_DIR/required_firmware"
+
+        # Copy over Modules and Firmware files and make sure to save attributes
+        cp -a /lib/modules $WORK_DIR/$KERNEL_V/
+        cp -a /lib/firmware $WORK_DIR/$KERNEL_V/
+        cd $WORK_DIR/$KERNEL_V
+
+        # Create drivers image
+        mksquashfs $WORK_DIR/$KERNEL_V $WORK_DIR/drivers -noappend -comp xz
+
+        # Create md5 sums
+        $WORK_DIR
+        md5sum $WORK_DIR/image | awk '{print $1}' > $WORK_DIR/image.md5
+        md5sum $WORK_DIR/drivers | awk '{print $1}' > $WORK_DIR/drivers.md5
+
+        echo "FW_COMMIT=$FW_COMMIT
+        FW_COMMIT_SORT=$FW_COMMIT_SORT" >> $GITHUB_ENV
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.event.inputs.kernel_version }}-mos
+        release_name: "MOS Kernel & Drivers"
+        body: |
+          ### Custom MOS Kernel and Drivers: ${{ github.event.inputs.kernel_version }}-mos
+
+          Release contents:
+          [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }): v${{ github.event.inputs.kernel_version }
+          [Firmware](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/commit/?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SORT }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Kernel to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/image
+        asset_name: image
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: Upload md5 to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/image.md5
+        asset_name: image.md5
+        asset_content_type: text/plain
+
+    - name: Upload Drivers to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/drivers
+        asset_name: drivers
+        asset_content_type: application/vnd.debian.binary-package
+
+    - name: Upload md5 to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ github.workspace }}/drivers.md5
+        asset_name: drivers.md5
+        asset_content_type: text/plain
+
+    - name: Cleanup
+      if: always()
+      run: rm -rf ${{ github.workspace }}/* ${{ github.workspace }}/.* /lib/modules /lib/firmware
