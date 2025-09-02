@@ -1,6 +1,7 @@
 name: Compile Kernel
 
 on:
+  # Allow to trigger action manually
   workflow_dispatch:
     inputs:
       kernel_version:
@@ -104,10 +105,10 @@ jobs:
         tag_name: ${{ github.event.inputs.kernel_version }}-mos
         release_name: "MOS Kernel & Drivers"
         body: |
-          ### Custom MOS Kernel and Drivers: ${{ github.event.inputs.kernel_version }}-mos
+          Custom MOS Kernel and Drivers: ${{ github.event.inputs.kernel_version }}-mos
 
-          Release contents:
-          [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }): v${{ github.event.inputs.kernel_version }}
+          ### Release contents:
+          [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }}): v${{ github.event.inputs.kernel_version }}
           [Firmware](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/commit/?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SORT }}
         draft: false
         prerelease: false
