@@ -111,7 +111,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.event.inputs.kernel_version }}-mos
-        release_name: "MOS Kernel & Drivers"
+        release_name: "${{ github.event.inputs.kernel_version }}-mos"
         body: |
           Custom MOS Kernel and Drivers: ${{ github.event.inputs.kernel_version }}-mos
 
