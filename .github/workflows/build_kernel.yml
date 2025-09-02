@@ -58,7 +58,7 @@ jobs:
         cd $WORK_DIR/firmware-source
         FW_COMMIT=$(git rev-parse HEAD)
         FW_COMMIT_SORT=$(git rev-parse --short HEAD)
-        ./copy-firmware $WORK_DIR/linux-firmware
+        $WORK_DIR/firmware-source/copy-firmware.sh $WORK_DIR/linux-firmware
 
         # Set MODULE_PATH variable
         cd $WORK_DIR
