@@ -26,9 +26,8 @@ jobs:
     - name: Compile Kernel
       run: |
         # Set Variables and create directories
-        DEFAULT_DIR=${{ github.workspace }}
-        BUILD_DIR=${DEFAULT_DIR}/build
-        WORK_DIR=${DEFAULT_DIR}
+        WORK_DIR=${{ github.workspace }}
+        BUILD_DIR=${WORK_DIR}/build
         KERNEL_V=${{ github.event.inputs.kernel_version }}
         rm -rf /lib/modules /lib/firmware
         mkdir -p $BUILD_DIR $WORK_DIR/$KERNEL_V $BUILD_DIR/$KERNEL_V /lib/modules /lib/firmware $BUILD_DIR/microcode/kernel/x86/microcode
@@ -40,7 +39,7 @@ jobs:
 
         # Copy Kernel config
         cd $BUILD_DIR/$KERNEL_V
-        cp $DEFAULT_DIR/kernel-config/config $BUILD_DIR/$KERNEL_V/.config
+        cp $WORK_DIR/kernel-config/config $BUILD_DIR/$KERNEL_V/.config
 
         # Compile Kernel
         make oldconfig
@@ -60,7 +59,7 @@ jobs:
         git clone --depth 1 https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git $WORK_DIR/firmware-source
         cd $WORK_DIR/firmware-source
         FW_COMMIT=$(git rev-parse HEAD)
-        FW_COMMIT_SORT=$(git rev-parse --short HEAD)
+        FW_COMMIT_SHORT=$(git rev-parse --short HEAD)
         $WORK_DIR/firmware-source/copy-firmware.sh $WORK_DIR/linux-firmware
 
         # Set MODULE_PATH variable
@@ -100,7 +99,8 @@ jobs:
 
         # Create microcode
         cd $WORK_DIR
-        git clone --depth 1 https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files
+        INTEL_MICROCODE=$(curl -u ${{ github.actor }}:${{ secrets.GITHUB_TOKEN }} -s https://api.github.com/repos/intel/Intel-Linux-Processor-Microcode-Data-Files/releases/latest | jq -r '.tag_name')
+        git clone --branch $INTEL_MICROCODE --single-branch --depth 1 https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files
         rm -f $WORK_DIR/Intel-Linux-Processor-Microcode-Data-Files/intel-ucode/0f-*
         cd $WORK_DIR/Intel-Linux-Processor-Microcode-Data-Files/intel-ucode
         iucode_tool -tb . -w $WORK_DIR/firmware-source/ $BUILD_DIR/microcode/kernel/x86/microcode/kernel/x86/microcode/GenuineIntel.bin
@@ -118,7 +118,8 @@ jobs:
         md5sum $WORK_DIR/headers-${KERNEL_V}-mos.tar.xz | awk '{print $1}' > $WORK_DIR/headers-${KERNEL_V}-mos.tar.xz.md5
 
         echo "FW_COMMIT=$FW_COMMIT
-        FW_COMMIT_SORT=$FW_COMMIT_SORT" >> $GITHUB_ENV
+        FW_COMMIT_SHORT=$FW_COMMIT_SHORT
+        INTEL_MICROCODE=$INTEL_MICROCODE" >> $GITHUB_ENV
 
     - name: Create Release
       id: create_release
@@ -133,7 +134,11 @@ jobs:
 
           ### Release contents:
           [Kernel](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/?h=v${{ github.event.inputs.kernel_version }}): ${{ github.event.inputs.kernel_version }}
-          [Firmware](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/commit/?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SORT }}
+          [Firmware](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/commit/?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SHORT }}
+
+          Microcode:
+          [AMD](https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/tree/amd-ucode?id=${{ env.FW_COMMIT }}): ${{ env.FW_COMMIT_SHORT }}
+          [Intel](https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files/releases/tag/${{ env.INTEL_MICROCODE }}): ${{ env.INTEL_MICROCODE }}
         draft: false
         prerelease: false
 
