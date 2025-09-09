@@ -30,7 +30,7 @@ jobs:
         BUILD_DIR=${WORK_DIR}/build
         KERNEL_V=${{ github.event.inputs.kernel_version }}
         rm -rf /lib/modules /lib/firmware
-        mkdir -p $BUILD_DIR $WORK_DIR/$KERNEL_V $BUILD_DIR/$KERNEL_V /lib/modules /lib/firmware $BUILD_DIR/microcode/kernel/x86/microcode
+        mkdir -p $BUILD_DIR $WORK_DIR/$KERNEL_V $BUILD_DIR/$KERNEL_V $BUILD_DIR/microcode/kernel/x86/microcode /lib/modules /lib/firmware
 
         # Download and extract Kernel
         cd $BUILD_DIR
@@ -103,8 +103,8 @@ jobs:
         git clone --branch $INTEL_MICROCODE --single-branch --depth 1 https://github.com/intel/Intel-Linux-Processor-Microcode-Data-Files
         rm -f $WORK_DIR/Intel-Linux-Processor-Microcode-Data-Files/intel-ucode/0f-*
         cd $WORK_DIR/Intel-Linux-Processor-Microcode-Data-Files/intel-ucode
-        iucode_tool -tb . -w $BUILD_DIR/microcode/kernel/x86/microcode/kernel/x86/microcode/GenuineIntel.bin
-        find $WORK_DIR/firmware-source/amd-ucode/ -name "*.bin" ! -name "*fam1ah*" -type f | xargs cat > $BUILD_DIR/microcode/kernel/x86/microcode/kernel/x86/microcode/AuthenticAMD.bin
+        iucode_tool -tb . -w $BUILD_DIR/microcode/kernel/x86/microcode/GenuineIntel.bin
+        find $WORK_DIR/firmware-source/amd-ucode/ -name "*.bin" ! -name "*fam1ah*" -type f | xargs cat > $BUILD_DIR/microcode/kernel/x86/microcode/AuthenticAMD.bin
         cd $BUILD_DIR/microcode
         find . | cpio -o -H newc > $WORK_DIR/microcode
 
