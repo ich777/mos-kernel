@@ -4106,7 +4106,7 @@ CONFIG_MEDIA_SUBDRV_AUTOSELECT=y
 #
 CONFIG_MEDIA_CAMERA_SUPPORT=y
 # CONFIG_MEDIA_ANALOG_TV_SUPPORT is not set
-# CONFIG_MEDIA_DIGITAL_TV_SUPPORT is not set
+CONFIG_MEDIA_DIGITAL_TV_SUPPORT=y
 # CONFIG_MEDIA_RADIO_SUPPORT is not set
 # CONFIG_MEDIA_SDR_SUPPORT is not set
 # CONFIG_MEDIA_PLATFORM_SUPPORT is not set
@@ -4115,6 +4115,7 @@ CONFIG_MEDIA_CAMERA_SUPPORT=y
 
 CONFIG_VIDEO_DEV=m
 CONFIG_MEDIA_CONTROLLER=y
+CONFIG_DVB_CORE=m
 
 #
 # Video4Linux options
@@ -4130,7 +4131,19 @@ CONFIG_V4L2_ASYNC=m
 #
 # Media controller options
 #
+# CONFIG_MEDIA_CONTROLLER_DVB is not set
 # end of Media controller options
+
+#
+# Digital TV options
+#
+# CONFIG_DVB_MMAP is not set
+CONFIG_DVB_NET=y
+CONFIG_DVB_MAX_ADAPTERS=32
+CONFIG_DVB_DYNAMIC_MINORS=y
+# CONFIG_DVB_DEMUX_SECTION_LOSS_LOG is not set
+# CONFIG_DVB_ULE_DEBUG is not set
+# end of Digital TV options
 
 #
 # Media drivers
@@ -4154,10 +4167,39 @@ CONFIG_VIDEO_TW5864=m
 # CONFIG_VIDEO_TW68 is not set
 # CONFIG_VIDEO_TW686X is not set
 # CONFIG_VIDEO_ZORAN is not set
+
+#
+# Media capture/analog/hybrid TV support
+#
+# CONFIG_VIDEO_CX18 is not set
+# CONFIG_VIDEO_CX23885 is not set
+# CONFIG_VIDEO_CX25821 is not set
+# CONFIG_VIDEO_CX88 is not set
+# CONFIG_VIDEO_SAA7134 is not set
+# CONFIG_VIDEO_SAA7164 is not set
+
+#
+# Media digital TV PCI Adapters
+#
+# CONFIG_DVB_B2C2_FLEXCOP_PCI is not set
+# CONFIG_DVB_DDBRIDGE is not set
+# CONFIG_DVB_DM1105 is not set
+# CONFIG_MANTIS_CORE is not set
+# CONFIG_DVB_NGENE is not set
+# CONFIG_DVB_PLUTO2 is not set
+# CONFIG_DVB_PT1 is not set
+# CONFIG_DVB_PT3 is not set
+# CONFIG_DVB_SMIPCIE is not set
+# CONFIG_DVB_BUDGET_CORE is not set
 # CONFIG_VIDEO_IPU3_CIO2 is not set
 # CONFIG_VIDEO_INTEL_IPU6 is not set
 # CONFIG_INTEL_VSC is not set
 # CONFIG_IPU_BRIDGE is not set
+
+#
+# FireWire (IEEE 1394) Adapters
+#
+# CONFIG_DVB_FIREDTV is not set
 CONFIG_VIDEOBUF2_CORE=m
 CONFIG_VIDEOBUF2_V4L2=m
 CONFIG_VIDEOBUF2_MEMOPS=m
@@ -4169,6 +4211,7 @@ CONFIG_MEDIA_HIDE_ANCILLARY_SUBDRV=y
 #
 # Media ancillary drivers
 #
+CONFIG_MEDIA_ATTACH=y
 
 #
 # IR I2C driver auto-selected by 'Autoselect ancillary drivers'
@@ -4283,6 +4326,70 @@ CONFIG_VIDEO_CAMERA_SENSOR=y
 # Video serializers and deserializers
 #
 # end of Video serializers and deserializers
+
+CONFIG_MEDIA_TUNER=m
+
+#
+# Tuner drivers auto-selected by 'Autoselect ancillary drivers'
+#
+CONFIG_MEDIA_TUNER_MC44S803=m
+CONFIG_MEDIA_TUNER_MT20XX=m
+CONFIG_MEDIA_TUNER_SIMPLE=m
+CONFIG_MEDIA_TUNER_TDA18271=m
+CONFIG_MEDIA_TUNER_TDA827X=m
+CONFIG_MEDIA_TUNER_TDA8290=m
+CONFIG_MEDIA_TUNER_TDA9887=m
+CONFIG_MEDIA_TUNER_XC2028=m
+CONFIG_MEDIA_TUNER_XC4000=m
+CONFIG_MEDIA_TUNER_XC5000=m
+
+#
+# DVB Frontend drivers auto-selected by 'Autoselect ancillary drivers'
+#
+
+#
+# Multistandard (satellite) frontends
+#
+
+#
+# Multistandard (cable + terrestrial) frontends
+#
+
+#
+# DVB-S (satellite) frontends
+#
+
+#
+# DVB-T (terrestrial) frontends
+#
+
+#
+# DVB-C (cable) frontends
+#
+
+#
+# ATSC (North American/Korean Terrestrial/Cable DTV) frontends
+#
+
+#
+# ISDB-T (terrestrial) frontends
+#
+
+#
+# ISDB-S (satellite) & ISDB-T (terrestrial) frontends
+#
+
+#
+# Digital terrestrial only tuners/PLL
+#
+
+#
+# SEC control devices for DVB-S
+#
+
+#
+# Common Interface (EN50221) controller drivers
+#
 # end of Media ancillary drivers
 
 #
