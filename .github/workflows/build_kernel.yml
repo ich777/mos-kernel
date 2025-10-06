@@ -48,8 +48,8 @@ jobs:
         # Copy image to output directory
         cp $BUILD_DIR/$KERNEL_V/arch/x86_64/boot/bzImage $WORK_DIR/image
 
-        # Save Kernel Headers
-        XZ_OPT="-9 -T0" tar -cJf $WORK_DIR/headers-${KERNEL_V}-mos.tar.xz .config Module.symvers System.map Makefile include/ scripts/ arch/x86/
+        # Save Kernel
+        XZ_OPT="-9 -T0" tar -cJf $WORK_DIR/${KERNEL_V}-mos.tar.xz .
 
         # Install Modules to /lib/modules
         make modules_install -j$(nproc --all)
@@ -115,7 +115,7 @@ jobs:
         md5sum $WORK_DIR/image | awk '{print $1}' > $WORK_DIR/image.md5
         md5sum $WORK_DIR/drivers | awk '{print $1}' > $WORK_DIR/drivers.md5
         md5sum $WORK_DIR/microcode | awk '{print $1}' > $WORK_DIR/microcode.md5
-        md5sum $WORK_DIR/headers-${KERNEL_V}-mos.tar.xz | awk '{print $1}' > $WORK_DIR/headers-${KERNEL_V}-mos.tar.xz.md5
+        md5sum $WORK_DIR/${KERNEL_V}-mos.tar.xz | awk '{print $1}' > $WORK_DIR/${KERNEL_V}-mos.tar.xz.md5
 
         echo "FW_COMMIT=$FW_COMMIT
         FW_COMMIT_SHORT=$FW_COMMIT_SHORT
@@ -202,24 +202,24 @@ jobs:
         asset_name: microcode.md5
         asset_content_type: text/plain
 
-    - name: Upload headers to Release
+    - name: Upload Kernel to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/headers-${{ github.event.inputs.kernel_version }}-mos.tar.xz
-        asset_name: headers-${{ github.event.inputs.kernel_version }}-mos.tar.xz
+        asset_path: ${{ github.workspace }}/${{ github.event.inputs.kernel_version }}-mos.tar.xz
+        asset_name: ${{ github.event.inputs.kernel_version }}-mos.tar.xz
         asset_content_type: application/x-xz-compressed-tar
 
-    - name: Upload headers md5 to Release
+    - name: Upload Kernel md5 to Release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ github.workspace }}/headers-${{ github.event.inputs.kernel_version }}-mos.tar.xz.md5
-        asset_name: headers-${{ github.event.inputs.kernel_version }}-mos.tar.xz.md5
+        asset_path: ${{ github.workspace }}/${{ github.event.inputs.kernel_version }}-mos.tar.xz.md5
+        asset_name: ${{ github.event.inputs.kernel_version }}-mos.tar.xz.md5
         asset_content_type: text/plain
 
     - name: Cleanup
