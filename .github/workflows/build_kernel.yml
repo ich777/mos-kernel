@@ -95,6 +95,7 @@ jobs:
         # Copy over Modules and Firmware files and make sure to save attributes
         cp -a /lib/modules $WORK_DIR/$KERNEL_V/
         cp -a /lib/firmware $WORK_DIR/$KERNEL_V/
+        rm -rf $WORK_DIR/$KERNEL_V/lib/modules/${KERNEL_V}-mos/build
         cd $WORK_DIR/$KERNEL_V
 
         # Create microcode
