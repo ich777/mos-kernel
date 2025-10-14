@@ -20,3 +20,6 @@ cd $BUILD_DIR/$KERNEL_V
 # Download config and start oldconfig
 wget -O $BUILD_DIR/$KERNEL_V/.config "https://raw.githubusercontent.com/ich777/mos-kernel/refs/heads/master/kernel-config/config"
 make oldconfig
+
+# Cleanup
+rm -rf $BUILD_DIR $WORK_DIR/$KERNEL_V
