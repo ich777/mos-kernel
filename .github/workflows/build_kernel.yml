@@ -49,6 +49,7 @@ jobs:
         cp $BUILD_DIR/$KERNEL_V/arch/x86_64/boot/bzImage $WORK_DIR/image
 
         # Save Kernel
+        echo "Creating Kernel archive..."
         XZ_OPT="-9 -T0" tar -cJf $WORK_DIR/${KERNEL_V}-mos.tar.xz .
 
         # Install Modules to /lib/modules
