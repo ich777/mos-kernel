@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.17.5 Kernel Configuration
+# Linux/x86 6.17.7 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc (Debian 12.2.0-14+deb12u1) 12.2.0"
 CONFIG_CC_IS_GCC=y
@@ -5537,7 +5537,7 @@ CONFIG_GIGABYTE_WMI=m
 #
 # Intel Speed Select Technology interface support
 #
-# CONFIG_INTEL_SPEED_SELECT_INTERFACE is not set
+CONFIG_INTEL_SPEED_SELECT_INTERFACE=m
 # end of Intel Speed Select Technology interface support
 
 CONFIG_INTEL_WMI=y
