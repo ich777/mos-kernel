@@ -32,9 +32,16 @@ jobs:
         rm -rf /lib/modules /lib/firmware
         mkdir -p $BUILD_DIR $WORK_DIR/$KERNEL_V $BUILD_DIR/$KERNEL_V $BUILD_DIR/microcode/kernel/x86/microcode $BUILD_DIR/microcode/kernel/firmware/amd-ucode /lib/modules /lib/firmware
 
+        # Safety check for Kernel versions ending with 0
+        if [ "${KERNEL_V##*.}" == "0" ]; then
+          DL_KERNEL_V="${KERNEL_V%.*}"
+        else
+          DL_KERNEL_V=$KERNEL_V
+        fi
+
         # Download and extract Kernel
         cd $BUILD_DIR
-        wget -O $BUILD_DIR/linux-$KERNEL_V.tar.xz https://cdn.kernel.org/pub/linux/kernel/v${KERNEL_V%%.*}.x/linux-$KERNEL_V.tar.xz;
+        wget -O $BUILD_DIR/linux-$KERNEL_V.tar.xz https://cdn.kernel.org/pub/linux/kernel/v${KERNEL_V%%.*}.x/linux-$DL_KERNEL_V.tar.xz;
         tar -C $BUILD_DIR/$KERNEL_V --strip-components=1 -xf $BUILD_DIR/linux-$KERNEL_V.tar.xz
 
         # Copy Kernel config
