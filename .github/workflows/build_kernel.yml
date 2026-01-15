@@ -117,6 +117,11 @@ jobs:
         cd $BUILD_DIR/microcode
         find . | cpio -o -H newc > $WORK_DIR/microcode
 
+        # Copy licenses and copying to drivers
+        mkdir -p $WORK_DIR/$KERNEL_V/usr/share/doc/linux/LICENSES/preferred
+        cp $BUILD_DIR/$KERNEL_V/COPYING $WORK_DIR/$KERNEL_V/usr/share/doc/linux/COPYING
+        cp $BUILD_DIR/$KERNEL_V/LICENSES/preferred/* $WORK_DIR/$KERNEL_V/usr/share/doc/linux/LICENSES/preferred/
+
         # Create drivers image
         mksquashfs $WORK_DIR/$KERNEL_V $WORK_DIR/drivers -noappend -comp xz
 
