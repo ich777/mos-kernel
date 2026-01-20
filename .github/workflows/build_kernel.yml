@@ -236,6 +236,22 @@ jobs:
         asset_name: ${{ github.event.inputs.kernel_version }}-mos.tar.xz.md5
         asset_content_type: text/plain
 
+    - name: Trigger mos-addon-drivers build workflow
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.MOS_ADDON_DRIVERS }}
+        script: |
+          await github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: 'mos-addon-drivers',
+            workflow_id: 'build_drivers.yml',
+            ref: 'master',
+            inputs: {
+              kernel_version: '${{ github.event.inputs.kernel_version }}',
+              drivers: 'all'
+            }
+          })
+
     - name: Cleanup
       if: always()
       run: rm -rf ${{ github.workspace }}/* ${{ github.workspace }}/.* /lib/modules /lib/firmware
