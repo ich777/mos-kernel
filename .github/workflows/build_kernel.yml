@@ -105,7 +105,9 @@ jobs:
         MODULE_PATH="/lib/modules/${KERNEL_V}-mos"
 
         # Generate file list
-        find "$MODULE_PATH" -name "*.ko*" -exec modinfo {} \; 2>/dev/null | \
+        find "$MODULE_PATH" \
+          -path "*/drivers/net/wireless" -prune -o \
+          -name "*.ko*" -exec modinfo {} \; 2>/dev/null | \
           grep "^firmware:" | cut -d: -f2- | sed 's/^[[:space:]]*//' | sort -u \
           > "$WORK_DIR/required_firmware"
 
