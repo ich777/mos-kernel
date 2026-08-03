@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.18.41 Kernel Configuration
+# Linux/x86 6.18.42 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="gcc (Debian 14.2.0-19) 14.2.0"
 CONFIG_CC_IS_GCC=y
@@ -5071,6 +5071,7 @@ CONFIG_AGP_INTEL=m
 # CONFIG_AGP_VIA is not set
 CONFIG_INTEL_GTT=m
 # CONFIG_VGA_SWITCHEROO is not set
+CONFIG_GPU_BUDDY=y
 CONFIG_DRM=m
 
 #
